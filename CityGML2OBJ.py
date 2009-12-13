@@ -8,7 +8,7 @@ import StringIO
 OUTFILE = "footprints_extruded.obj"
 INFILE = "footprints_extruded.xml"
 # Offset to translate the object from global coordinates to 'local' coordinates
-OFFSET = [85430.08,446051.26] #specific for tu-delft campus
+# OFFSET = [85430.08,446051.26] #specific for tu-delft campus
 
 GML = "{%s}" % 'http://www.opengis.net/gml'
 CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
@@ -26,7 +26,13 @@ def convert(infile, outfile):
         - Wavefront .OBJ file
     """
 
+    def xyOffset(plist):
+        x = (min(plist[0])+max(plist[0]))/2
+        y = (min(plist[1])+max(plist[1]))/2
+        return (x,y)
+
     # parse the infile
+    print 'Reading file...'
     tree = etree.parse(infile)
     # for storing vertices:
     vert = StringIO.StringIO()
@@ -49,14 +55,29 @@ def convert(infile, outfile):
                 print >>fac, pointlist.index(lR[pos].text)+1,
             print >>fac
 
-    # Generate the vertex-lines in the .obj file. Also translate the points using the OFFSET
-    for v in pointlist:
-        c = v.split()
-        print >>vert, "v %.7f %.7f %s" % ( float(c[0])-OFFSET[0], float(c[1])-OFFSET[1], c[2] )
+    print 'translating points...'
+    pointlistF = []
+    for t in range(3):
+        pointlistF.append([])
 
+    # convert pointlist to floating points
+    for i, v in enumerate(pointlist):
+        c = v.split()
+        pointlistF[0].append(float(c[0]))
+        pointlistF[1].append(float(c[1]))
+        pointlistF[2].append(float(c[2]))
+
+    # calculate offset
+    offset = xyOffset(pointlistF)
+
+    # Generate the vertex-lines in the .obj file. Also translate the points using the OFFSET
+    for i in range(len(pointlistF[0])):
+        print >>vert, "v %.7f %.7f %.2f" % ( pointlistF[0][i]-offset[0], pointlistF[1][i]-offset[1], pointlistF[2][i] )
+
+    print 'Writing file...'
     # write the file
     f = open(OUTFILE, 'w')
-    f.write("# location in WGS84 (lat,long): 51.9985,4.374211\n") # specific for the tu-delt campus
+    #f.write("# location in WGS84 (lat,long): 51.9985,4.374211\n") # specific for the tu-delt campus
     f.write(vert.getvalue())
     f.write(fac.getvalue())
     f.close()
