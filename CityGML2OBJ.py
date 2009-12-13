@@ -29,7 +29,7 @@ def transformPoint(sEPSG, tEPSG, xypoint):
     poCT=ogr.osr.CoordinateTransformation(sSRS,tSRS) 
 
     x, y = xypoint
-    return poCT.TransformPoint(x,y,0.)[:-1]
+    return poCT.TransformPoint(x,y,0.)
     
 def convert(infile, outfile):
     """
@@ -92,7 +92,8 @@ def convert(infile, outfile):
 
     # write the file
     f = open(OUTFILE, 'w')
-    f.write("#Location in WGS84 (lat,long): \n#%.6f,%.6f\n" % transformPoint(28992,4326,offset))
+    lg, lt, h = transformPoint(28992,4326,offset)
+    f.write("#Location in WGS84 (lat,long): \n#%.6f,%.6f\n" % (lt, lg))
     f.write(vert.getvalue())
     f.write(fac.getvalue())
     f.close()
