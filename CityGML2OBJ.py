@@ -56,12 +56,13 @@ def convert(infile, outfile):
             print >>fac
 
     print 'translating points...'
+    # initialize
     pointlistF = []
     for t in range(3):
         pointlistF.append([])
 
     # convert pointlist to floating points
-    for i, v in enumerate(pointlist):
+    for v in pointlist:
         c = v.split()
         pointlistF[0].append(float(c[0]))
         pointlistF[1].append(float(c[1]))
@@ -74,13 +75,14 @@ def convert(infile, outfile):
     for i in range(len(pointlistF[0])):
         print >>vert, "v %.7f %.7f %.2f" % ( pointlistF[0][i]-offset[0], pointlistF[1][i]-offset[1], pointlistF[2][i] )
 
-    print 'Writing file...'
     # write the file
     f = open(OUTFILE, 'w')
     #f.write("# location in WGS84 (lat,long): 51.9985,4.374211\n") # specific for the tu-delt campus
     f.write(vert.getvalue())
     f.write(fac.getvalue())
     f.close()
+    
+    print 'done'
 
 if __name__ == "__main__":
     main(sys.argv[1:])
