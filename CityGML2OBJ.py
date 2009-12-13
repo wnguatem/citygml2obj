@@ -3,6 +3,7 @@
 import sys, os
 from lxml import etree
 import StringIO
+from osgeo import ogr
 
 #-- Global variables
 OUTFILE = "footprints_extruded.obj"
@@ -15,6 +16,20 @@ CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
 
 def main(argv):
     convert(INFILE, OUTFILE)
+
+def transformPoint(sEPSG, tEPSG, xypoint):
+    #source SRS 
+    sSRS=ogr.osr.SpatialReference() 
+    sSRS.ImportFromEPSG(sEPSG) 
+
+    #target SRS 
+    tSRS=ogr.osr.SpatialReference() 
+    tSRS.ImportFromEPSG(tEPSG) 
+
+    poCT=ogr.osr.CoordinateTransformation(sSRS,tSRS) 
+
+    x, y = xypoint
+    return poCT.TransformPoint(x,y,0.)
     
 def convert(infile, outfile):
     """
@@ -77,7 +92,8 @@ def convert(infile, outfile):
 
     # write the file
     f = open(OUTFILE, 'w')
-    #f.write("# location in WGS84 (lat,long): 51.9985,4.374211\n") # specific for the tu-delt campus
+    x, y, null = transformPoint(28992,4326,offset)
+    f.write("# location in WGS84 (lat,long): %.6f, %.6f\n" % (x,y))
     f.write(vert.getvalue())
     f.write(fac.getvalue())
     f.close()
