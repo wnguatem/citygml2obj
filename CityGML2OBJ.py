@@ -19,11 +19,34 @@ def main(argv):
     convert(INFILE, OUTFILE)
 
 def transformPoint(sEPSG, tEPSG, xypoint):
-    # Caution! need to edit /usr/share/proj/epsg
-    # http://trac.osgeo.org/gdal/ticket/1987
     #source SRS 
-    sSRS=ogr.osr.SpatialReference() 
-    sSRS.ImportFromEPSG(sEPSG) 
+    sSRS=ogr.osr.SpatialReference()
+    if (sEPSG == 28992):
+        sSRS.ImportFromWkt("""
+            PROJCS["Amersfoort / RD New",
+            GEOGCS["Amersfoort",
+                DATUM["Amersfoort",
+                    SPHEROID["Bessel 1841",6377397.155,299.1528128,
+                        AUTHORITY["EPSG","7004"]],
+                    AUTHORITY["EPSG","6289"]],
+                PRIMEM["Greenwich",0,
+                    AUTHORITY["EPSG","8901"]],
+                UNIT["degree",0.01745329251994328,
+                    AUTHORITY["EPSG","9122"]],
+                TOWGS84[565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812],
+                AUTHORITY["EPSG","4289"]],
+            UNIT["metre",1,
+                AUTHORITY["EPSG","9001"]],
+            PROJECTION["Oblique_Stereographic"],
+            PARAMETER["latitude_of_origin",52.15616055555555],
+            PARAMETER["central_meridian",5.38763888888889],
+            PARAMETER["scale_factor",0.9999079],
+            PARAMETER["false_easting",155000],
+            PARAMETER["false_northing",463000],
+            AUTHORITY["EPSG","28992"]]
+        """)
+    else:
+        sSRS.ImportFromEPSG(sEPSG) 
 
     #target SRS 
     tSRS=ogr.osr.SpatialReference() 
