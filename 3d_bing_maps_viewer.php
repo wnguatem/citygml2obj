@@ -1,3 +1,20 @@
+<?php
+         	
+
+         	
+		    $file = "http://files.ylan.nl/footprints_extruded.obj";
+         	
+         	$data = file($file);
+         	         	
+         	$latlong = substr($data[1],1);
+         	
+         	$data = explode(',',$latlong);
+         	$lat = $data[0];
+         	$long = $data[1];
+
+         	
+ ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
    <head>
@@ -20,7 +37,8 @@
          function AddModel(type)
          {
             
-			var center = new VELatLong(51.99063352375223, 4.37698175131956);
+			
+			var center = new VELatLong(<?php echo $lat.",".$long;?>);
 			var orientation = new VEModelOrientation(0, 90, 0);
 			
 			document.getElementById('textfield').value = center
@@ -55,16 +73,17 @@
       </script>
    </head>
    <body onload="GetMap();">
-      <div id='myMap' style="position:relative; width:600px; height:400px;"></div>
+
+      <form id="form1" name="form1" method="post" action="">
+            <div id='myMap' style="position:relative; width:600px; height:400px;"></div>
       <p>
         <input id="txtSource" type="text" value="http://files.ylan.nl/footprints_extruded.obj" name="txtSource">
         <input id="btnAddModel" type="button" value="Load 3D Model" 
-         onclick="AddModel();">
+         onclick="AddModel();" name="btnAddModel">
       </p>
-      <form id="form1" name="form1" method="post" action="">
-        <label>
+			center point:<br>
           <input type="text" name="textfield" id="textfield" />
-        </label>
+
       </form>
       <p>&nbsp;</p>
    </body>
