@@ -1,5 +1,3 @@
-# TODO: rotate coordinates by 90 degree clockwise around the X-axis
-# TODO: triangulate/quadratize polygons
 import sys, os
 from lxml import etree
 import StringIO
