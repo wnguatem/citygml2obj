@@ -8,6 +8,7 @@ from osgeo import ogr
 #-- Global variables
 OUTFILE = "footprints_extruded.obj"
 INFILE = "footprints_extruded.xml"
+SEPSG, TEPSG = 28992,4326
 # Offset to translate the object from global coordinates to 'local' coordinates
 # OFFSET = [85430.08,446051.26] #specific for tu-delft campus
 
@@ -18,6 +19,8 @@ def main(argv):
     convert(INFILE, OUTFILE)
 
 def transformPoint(sEPSG, tEPSG, xypoint):
+    # Caution! need to edit /usr/share/proj/epsg
+    # http://trac.osgeo.org/gdal/ticket/1987
     #source SRS 
     sSRS=ogr.osr.SpatialReference() 
     sSRS.ImportFromEPSG(sEPSG) 
@@ -92,13 +95,14 @@ def convert(infile, outfile):
 
     # write the file
     f = open(OUTFILE, 'w')
-    lg, lt, h = transformPoint(28992,4326,offset)
-    f.write("#Location in WGS84 (lat,long): \n#%.6f,%.6f\n" % (lt, lg))
+    lg, lt, h = transformPoint(SEPSG,TEPSG,offset)
+    f.write("#Location in WGS84 (lat,long): \n#%.9f,%.9f\n" % (lt, lg))
     f.write(vert.getvalue())
     f.write(fac.getvalue())
     f.close()
     
-    print 'done'
+    print 'Applied offset: %.9f, %.9f' % offset
+    print 'EPSG %d location: %.9f, %.9f' % (TEPSG,lt,lg)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
