@@ -9,8 +9,6 @@ from osgeo import ogr
 OUTFILE = "footprints_extruded.obj"
 INFILE = "footprints_extruded.xml"
 SEPSG, TEPSG = 28992,4326
-# Offset to translate the object from global coordinates to 'local' coordinates
-# OFFSET = [85430.08,446051.26] #specific for tu-delft campus
 
 GML = "{%s}" % 'http://www.opengis.net/gml'
 CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
