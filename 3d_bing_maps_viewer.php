@@ -101,7 +101,7 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
               </tr>
               <?php
               
-              $sql_select	= "SELECT objID,obj,nof,date from bingmodel";
+              $sql_select	= "SELECT objID,obj,nof,date from bingModel";
               $sql			= mysql_query($sql_select);
               if(mysql_num_rows($sql)>0)
               {
