@@ -22,7 +22,7 @@ if (isset($_POST['upload']))
 				if(move_uploaded_file($_FILES['file']['tmp_name'],$target_path))
 				{
 					//	create a name for output file
-					$outfileName = substr($file,0,strlen($file)-3).'obj';
+					$outfileName = substr($file,0,strlen($file)-4)."-".time().".".'obj';
 					
 					// RUN PYTHON code
 					// first get path info					
