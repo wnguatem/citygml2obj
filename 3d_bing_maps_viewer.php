@@ -1,4 +1,6 @@
 <?php
+// change upload_max_filesize in php.ini.
+// for example: upload_max_filesize = 10M
          	
 
          	
@@ -42,18 +44,14 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
             map.SetMapMode(VEMapMode.Mode3D);
          }   
 
-         function AddModel(type)
-         {
-            
+         function AddModel(objfile)
+         {            
 			
 			var center = new VELatLong(<?php echo $lat.",".$long;?>);
 			var orientation = new VEModelOrientation(0, 90, 0);
 			
-			document.getElementById('textfield').value = center
-
-
             var layer = new VEShapeLayer();
-            var modelSpec = new VEModelSourceSpecification(VEModelFormat.OBJ,'footprints_extruded.obj', layer);
+            var modelSpec = new VEModelSourceSpecification(VEModelFormat.OBJ,objfile, layer);
             map.Import3DModel(modelSpec, onModelLoad, center, orientation, null);
 
             // go to model
@@ -93,7 +91,7 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
 
       </p>
 
-      </form>
+      
       
                   <table width="60%" border="0" align="left">
               <tr>
@@ -110,14 +108,14 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
               	while($row = mysql_fetch_object($sql))
               	{
               		
-              		$objFile = $row->obj;
+              		$objFile = 'http://'.$_SERVER['SERVER_ADDR'].dirname($_SERVER['PHP_SELF']).'/upload/'.$row->obj;
               		
               		echo "              <tr>
                 <td bgcolor=\"#E1E1E1\">$row->objID</td>
                 <td bgcolor=\"#E1E1E1\">$row->nof</td>
                 <td bgcolor=\"#E1E1E1\">$row->date</td>
                 <td bgcolor=\"#E1E1E1\"><input id=\"btnAddModel\" type=\"button\" value=\"Load 3D Model\" 
-         onclick=\"AddModel();\">
+         onClick=\"AddModel('$objFile');\">
 </td>
               </tr>";
               
@@ -138,6 +136,6 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
       <?php 
       include("uploader.php");      
       ?>
-      
+      </form>
    </body>
 </html>
