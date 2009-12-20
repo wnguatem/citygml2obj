@@ -12,6 +12,14 @@
          	$lat = $data[0];
          	$long = $data[1];
 
+// make db connection
+$host = "localhost";
+$user = "root";
+$pass = "1234";
+$dbname = "vis3";
+
+$connect = mysql_connect($host,$user,$pass) or die(mysql_error());
+mysql_select_db($dbname,$connect) or die(mysql_error());
          	
  ?>
 
@@ -45,14 +53,14 @@
 
 
             var layer = new VEShapeLayer();
-            var modelSpec = new VEModelSourceSpecification(VEModelFormat.OBJ, document.getElementById('txtSource').value, layer);
+            var modelSpec = new VEModelSourceSpecification(VEModelFormat.OBJ,'footprints_extruded.obj', layer);
             map.Import3DModel(modelSpec, onModelLoad, center, orientation, null);
 
             // go to model
             map.SetCenterAndZoom(center, 16);
          }
 
-         function onModelLoad(model, status)
+         function onModelLoad(status)
          {
             if (status == VEModelStatusCode.Success)
             {
@@ -73,18 +81,63 @@
       </script>
    </head>
    <body onload="GetMap();">
+    
 
-      <form id="form1" name="form1" method="post" action="">
+      <form name="uploader" enctype="multipart/form-data" method="POST" action="">
             <div id='myMap' style="position:relative; width:600px; height:400px;"></div>
-      <p>
-        <input id="txtSource" type="text" value="http://files.ylan.nl/footprints_extruded.obj" name="txtSource">
-        <input id="btnAddModel" type="button" value="Load 3D Model" 
-         onclick="AddModel();" name="btnAddModel">
+            <br />
+
+     <p>
+      <input type="file" name="file">
+          <input type="submit" name="upload" value="Upload GML file" />
+
       </p>
-			center point:<br>
-          <input type="text" name="textfield" id="textfield" />
 
       </form>
-      <p>&nbsp;</p>
+      
+                  <table width="60%" border="0" align="left">
+              <tr>
+                <td width="10%" bgcolor="#CCCCCC">objID</td>
+                <td width="40%" bgcolor="#CCCCCC">number of features</td>
+                <td width="50%" bgcolor="#CCCCCC">date</td>
+              </tr>
+              <?php
+              
+              $sql_select	= "SELECT objID,obj,nof,date from bingmodel";
+              $sql			= mysql_query($sql_select);
+              if(mysql_num_rows($sql)>0)
+              {
+              	while($row = mysql_fetch_object($sql))
+              	{
+              		
+              		$objFile = $row->obj;
+              		
+              		echo "              <tr>
+                <td bgcolor=\"#E1E1E1\">$row->objID</td>
+                <td bgcolor=\"#E1E1E1\">$row->nof</td>
+                <td bgcolor=\"#E1E1E1\">$row->date</td>
+                <td bgcolor=\"#E1E1E1\"><input id=\"btnAddModel\" type=\"button\" value=\"Load 3D Model\" 
+         onclick=\"AddModel();\">
+</td>
+              </tr>";
+              
+              	}
+              }
+              else 
+              {
+              	   echo "<tr><td colspan=\"3\" bgcolor=\"#E1E1E1\">No models in database</td></tr>";
+              }
+              
+              ?>
+              
+            </table>
+
+            <br>
+
+      
+      <?php 
+      include("uploader.php");      
+      ?>
+      
    </body>
 </html>
