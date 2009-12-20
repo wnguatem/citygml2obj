@@ -38,7 +38,7 @@ def insertDB(objFilePath,cPointLat,cPointLong,gmlFilePath,nof):
 
     date = str(now.year)+"-"+str(now.month)+"-"+str(now.day)
 
-    db.query("""INSERT INTO bingmodel (obj,cPointLat,cPointLong,gml,nof,date)
+    db.query("""INSERT INTO bingModel (obj,cPointLat,cPointLong,gml,nof,date)
 VALUES ('"""+str(objFilePath)+"""',"""+str(cPointLat)+""","""+str(cPointLong)+""",'"""+str(gmlFilePath)+"""',"""+str(nof)+""",'"""+date+"""')""")   
 
 def transformPoint(sEPSG, tEPSG, xypoint):
