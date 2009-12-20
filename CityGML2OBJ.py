@@ -1,19 +1,39 @@
+#General modules:
 import sys, os
-from lxml import etree
 import StringIO
+
+#lxml for parsing gml:
+from lxml import etree
+
+#OGR for performing crs transformation
 from osgeo import ogr
+
+#server modules:
 import _mysql
 import datetime
 from mod_python import util
 
 #-- Global variables
+
+# It will be assumed the gml-model is in SEPSG. TEPSG should be the epsg code from bing.
 SEPSG, TEPSG = 28992,4326
 
+# some namespaces for the gml parsing
 GML = "{%s}" % 'http://www.opengis.net/gml'
 CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
 
 def main(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
-
+    """
+    Performs conversion, adds the model to DB, and redirects the user back to the main page. Note that this function is made to be called from a browser using mod_python et all.
+    Input:
+    - req: mod_python specific (something with the current http Request)
+    - INFILE: the location of the cityGML file
+    - OUTFILE: where to put the .obj file
+    - INFILE_DB: reference string for the gml file to put in DB
+    - OUTFILE_DB: reference string for the obj file to put in DB
+    Output:
+    - Redirects user to main php script 
+    """
     data = convert(INFILE, OUTFILE)
 
     cPointLat,cPointLong,nof = data
@@ -24,26 +44,47 @@ def main(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
 
 
 def insertDB(objFilePath,cPointLat,cPointLong,gmlFilePath,nof):
-    """ Insert information about uploaded file into mysql db"""
-
+    """
+    Insert information about uploaded file into mysql db
+    Input:
+    - objFilePath: reference string for the gml file
+    - cPointLat: Latitude of the model in WGS84
+    - cPointLong: Longitude of the model in WGS84 
+    - gmlFilePath: reference string for the obj file
+    - nof: Number of features in the model
+    Output:
+    - the above info will be in the DB
+    """
+    # Required information to connect to DB
     host = 'localhost'
     user = 'root'
     password = '1234'
     dbname = 'vis3'     
     
+    # make DB connection
     db = _mysql.connect(host,user,password,dbname)
 
     # get current date
     now = datetime.datetime.now()
-
     date = str(now.year)+"-"+str(now.month)+"-"+str(now.day)
-
+    
+    # Put information in DB
     db.query("""INSERT INTO bingModel (obj,cPointLat,cPointLong,gml,nof,date)
 VALUES ('"""+str(objFilePath)+"""',"""+str(cPointLat)+""","""+str(cPointLong)+""",'"""+str(gmlFilePath)+"""',"""+str(nof)+""",'"""+date+"""')""")   
 
 def transformPoint(sEPSG, tEPSG, xypoint):
+    """
+    Will transform the coordinates of a given point in sEPSG to the coordinates in tEPSG. Note that the height of the point in the sEPSG will be taken 0.
+    Input:
+    - sEPSG: source EPSG-code
+    - tEPSG: target EPSG-code
+    - xypoint: coordinates of the point in sEPSG
+    Output:
+    - Coordinates in tEPSG
+    """
     #source SRS 
     sSRS=ogr.osr.SpatialReference()
+    # circumvent a bug in ogr/proj4 that introduces a shift, when transforming from RD New to WGS84
     if (sEPSG == 28992):
         sSRS.ImportFromWkt("""
             PROJCS["Amersfoort / RD New",
@@ -84,13 +125,17 @@ def convert(infile, outfile):
     """
     Function that converts simple citygml to .obj
     Input:
-        infile
-        outfile
+    - infile: the location of the cityGML file
+    - outfile: where to put the .obj file
     Output:
-        - Wavefront .OBJ file
+    - Wavefront .OBJ file, including model location and number of features in the header (first 4 lines)
+    - data: tuple containing lat/long of the model in WGS84 and the number of features
     """
 
     def xyOffset(plist):
+        """ 
+        Calculates center-point of the model.
+        """
         x = (min(plist[0])+max(plist[0]))/2
         y = (min(plist[1])+max(plist[1]))/2
         return (x,y)
@@ -151,10 +196,7 @@ def convert(infile, outfile):
     print 'Applied offset: %.9f, %.9f' % offset
     print 'EPSG %d location: %.9f, %.9f' % (TEPSG,lt,lg)
 
-    data = [0,0,0]
-    data[0],data[1],data[2] = lt, lg, count
-
-    return data
+    return (lt, lg, count)
 
 #if __name__ == "__main__":
 #    main(INFILE,OUTFILE,cPointLat,cPointLong,nof)
