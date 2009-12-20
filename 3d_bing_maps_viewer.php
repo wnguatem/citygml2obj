@@ -108,7 +108,7 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
               	while($row = mysql_fetch_object($sql))
               	{
               		
-              		$objFile = 'http://'.$_SERVER['SERVER_ADDR'].dirname($_SERVER['PHP_SELF']).'/upload/'.$row->obj;
+              		$objFile = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/upload/'.$row->obj;
               		
               		echo "              <tr>
                 <td bgcolor=\"#E1E1E1\">$row->objID</td>
