@@ -1,6 +1,8 @@
 <?php
+// if button upload is pressed
 if (isset($_POST['upload']))
 {
+	// if user have entered a file
 	if(isset($_FILES['file']))
 	{
 		// get file path
@@ -13,31 +15,27 @@ if (isset($_POST['upload']))
 		if($_FILES['file']['size']<10485760)
 		{
 		
+			// only .xml files are allowed
 			if(validFile($file))
 			{
-					
+				// move temp file to upload folder	
 				if(move_uploaded_file($_FILES['file']['tmp_name'],$target_path))
 				{
+					//	create a name for output file
 					$outfileName = substr($file,0,strlen($file)-3).'obj';
 					
 					// RUN PYTHON code
-					//$infile = addslashes(dirname($_SERVER['SCRIPT_FILENAME']).$target_path);
-					
-					$fullpath = $_SERVER['SCRIPT_FILENAME'];
-                    $lastslash = strripos($fullpath, '/');
-                    $path = substr($fullpath, 0, $lastslash);
+					// first get path info					
+                    $path = dirname($_SERVER['SCRIPT_FILENAME']);
                     
+                    // get input file and output file
 					$infile = "$path/upload/$file";
 					$outfile = "$path/upload/$outfileName";
 					
+					// RUN main from python script with given arguments
 					$url = "CityGML2OBJ.py/main?INFILE=$infile&OUTFILE=$outfile&INFILE_DB=$file&OUTFILE_DB=$outfileName";
-					echo "<meta http-equiv=\"refresh\" content=\"0;url=$url\">";
-					
-					
-										
-					//template_msg("The file: ".$file." has been uploaded");				
-					
-					
+					echo "<meta http-equiv=\"refresh\" content=\"0;url=$url\">"; // execute $url command
+						
 				}
 				else
 				{
@@ -60,6 +58,7 @@ if (isset($_POST['upload']))
 	}
 }
 
+// function used to show msg
 function template_msg($msg)
 {
 	?>
@@ -72,6 +71,7 @@ function template_msg($msg)
 	<?php	
 }
 
+// Check if file is valid. Only .xml files are allowed
 function validFile($file)
 {
 	return (substr($file,strlen($file)-4))=='.xml' ? true : false;
