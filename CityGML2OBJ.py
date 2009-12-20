@@ -2,6 +2,8 @@ import sys, os
 from lxml import etree
 import StringIO
 from osgeo import ogr
+import _mysql
+import datetime
 
 #-- Global variables
 OUTFILE = "footprints_extruded.obj"
@@ -13,6 +15,26 @@ CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
 
 def main(argv):
     convert(INFILE, OUTFILE)
+
+    insertDB(OUTFILE,51.996995388,4.375324684,INFILE,370)
+
+def insertDB(objFilePath,cPointLat,cPointLong,gmlFilePath,nof):
+    """ Insert information about uploaded file into mysql db"""
+
+    host = 'localhost'
+    user = 'root'
+    password = '1234'
+    dbname = 'vis3'     
+    
+    db = _mysql.connect(host,user,password,dbname)
+
+    # get current date
+    now = datetime.datetime.now()
+
+    date = str(now.year)+"-"+str(now.month)+"-"+str(now.day)
+
+    db.query("""INSERT INTO bingmodel (obj,cPointLat,cPointLong,gml,nof,date)
+VALUES ('"""+str(objFilePath)+"""',"""+str(cPointLat)+""","""+str(cPointLong)+""",'"""+str(gmlFilePath)+"""',"""+str(nof)+""",'"""+date+"""')""")   
 
 def transformPoint(sEPSG, tEPSG, xypoint):
     #source SRS 
