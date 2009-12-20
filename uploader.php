@@ -18,9 +18,19 @@ if (isset($_POST['upload']))
 					
 				if(move_uploaded_file($_FILES['file']['tmp_name'],$target_path))
 				{
-					// RUN PYTHON code
+					$outfileName = substr($file,0,strlen($file)-3).'obj';
 					
-					template_msg("The file: ".$file." has been uploaded");				
+					// RUN PYTHON code
+					//$infile = addslashes(dirname($_SERVER['SCRIPT_FILENAME']).$target_path);
+					$infile = "F:\\Program%20Files\\EasyPHP3.1\\www\\3visual_assgn\\upload\\$file";
+					$outfile = "F:\\Program%20Files\\EasyPHP3.1\\www\\3visual_assgn\\upload\\$outfileName";
+					
+					$url = "http://localhost/3visual_assgn/CityGML2OBJ.py/main?INFILE=$infile&OUTFILE=$outfile&INFILE_DB=$file&OUTFILE_DB=$outfileName";
+					echo "<meta http-equiv=\"refresh\" content=\"0;url=$url\">";
+					
+					
+										
+					//template_msg("The file: ".$file." has been uploaded");				
 					
 					
 				}

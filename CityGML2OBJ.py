@@ -4,19 +4,24 @@ import StringIO
 from osgeo import ogr
 import _mysql
 import datetime
+from mod_python import util
 
 #-- Global variables
-OUTFILE = "footprints_extruded.obj"
-INFILE = "footprints_extruded.xml"
 SEPSG, TEPSG = 28992,4326
 
 GML = "{%s}" % 'http://www.opengis.net/gml'
 CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
 
-def main(argv):
-    convert(INFILE, OUTFILE)
+def main(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
 
-    insertDB(OUTFILE,51.996995388,4.375324684,INFILE,370)
+    data = convert(INFILE, OUTFILE)
+
+    cPointLat,cPointLong,nof = data
+    
+    insertDB(OUTFILE_DB,cPointLat,cPointLong,INFILE_DB,nof)
+
+    util.redirect(req, '../3d_bing_maps_viewer.php')
+
 
 def insertDB(objFilePath,cPointLat,cPointLong,gmlFilePath,nof):
     """ Insert information about uploaded file into mysql db"""
@@ -136,7 +141,7 @@ def convert(infile, outfile):
         print >>vert, "v %.7f %.7f %.2f" % ( pointlistF[0][i]-offset[0], pointlistF[1][i]-offset[1], pointlistF[2][i] )
 
     # write the file
-    f = open(OUTFILE, 'w')
+    f = open(outfile, 'w')
     lg, lt, h = transformPoint(SEPSG,TEPSG,offset)
     f.write("#Location in WGS84 (lat,long):\n#%.9f,%.9f\n#Number of features:\n#%d\n" % (lt, lg, count))
     f.write(vert.getvalue())
@@ -146,5 +151,10 @@ def convert(infile, outfile):
     print 'Applied offset: %.9f, %.9f' % offset
     print 'EPSG %d location: %.9f, %.9f' % (TEPSG,lt,lg)
 
-if __name__ == "__main__":
-    main(sys.argv[1:])
+    data = [0,0,0]
+    data[0],data[1],data[2] = lt, lg, count
+
+    return data
+
+#if __name__ == "__main__":
+#    main(INFILE,OUTFILE,cPointLat,cPointLong,nof)
