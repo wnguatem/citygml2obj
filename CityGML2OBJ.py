@@ -77,9 +77,10 @@ def convert(infile, outfile):
     fac = StringIO.StringIO()
 
     pointlist = []
-    
+    count = 0
     # loop through the ciyObjectMember elements, for all faces put the points in a set (so that they are not duplicated). Then extend the pointlist with that set. This gives every unique point an index
     for cOM in tree.iter(CGML+"cityObjectMember"):
+        count += 1
         s = set([])
         for lR in cOM.iter(GML+"LinearRing"):
             for pos in lR:
@@ -115,7 +116,7 @@ def convert(infile, outfile):
     # write the file
     f = open(OUTFILE, 'w')
     lg, lt, h = transformPoint(SEPSG,TEPSG,offset)
-    f.write("#Location in WGS84 (lat,long): \n#%.9f,%.9f\n" % (lt, lg))
+    f.write("#Location in WGS84 (lat,long):\n#%.9f,%.9f\n#Number of features:\n#%d\n" % (lt, lg, count))
     f.write(vert.getvalue())
     f.write(fac.getvalue())
     f.close()
