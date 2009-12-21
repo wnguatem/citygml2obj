@@ -132,16 +132,8 @@ def convert(infile, outfile):
     - data: tuple containing lat/long of the model in WGS84 and the number of features
     """
 
-    def xyOffset(plist):
-        """ 
-        Calculates center-point of the model.
-        """
-        x = (min(plist[0])+max(plist[0]))/2
-        y = (min(plist[1])+max(plist[1]))/2
-        return (x,y)
-
     def checkBottomFace(data):
-        """ Check if current face is bottom face, data contains [linearRing,x,y,z]"""
+        """ Check if current face is bottom face, data contains [x,y,z]"""
 
         bottomFace = True
         
@@ -153,7 +145,7 @@ def convert(infile, outfile):
 
     def getArea(polygon):
         """ Get area of a polygon, polygon list looks like [[x1,y1,z1],[x2,y2,z2]] """
-        # soruce: http://en.wikipedia.org/wiki/Centroid
+        # soruce for calculation method: http://en.wikipedia.org/wiki/Centroid
 
         Asum = 0
         for p in range(0,len(polygon)):
@@ -167,7 +159,7 @@ def convert(infile, outfile):
 
     def getCentroid(Area,polygon):
         """ returns centroid of polygon in x,y coordinates"""
-        # soruce: http://en.wikipedia.org/wiki/Centroid
+        # soruce for calculation method: http://en.wikipedia.org/wiki/Centroid
 
         Sum = 0
         for p in range(0,len(polygon)):
@@ -192,7 +184,7 @@ def convert(infile, outfile):
         return (Cx,Cy)
 
     def getFinalCentroid(bottomFaces,nof):
-        """Calculate centroid of all bottomfaces together, bottomfaces contains the polygons of each ciyObjectMember.
+        """Calculate centroid of all bottomfaces together, bottomfaces contains the bottom polygons of each ciyObjectMember.
 nof is the number of features you have"""
 
         sumCx = 0
@@ -222,15 +214,14 @@ nof is the number of features you have"""
     pointlist = []
     count = 0
     bottomFaces = []
-    cOMCount = 0
     
     # loop through the ciyObjectMember elements, for all faces put the points in a set (so that they are not duplicated). Then extend the pointlist with that set. This gives every unique point an index
     for cOM in tree.iter(CGML+"cityObjectMember"):
         count += 1
-        cOMCount += 1
         s = set([])
 
         # for each cOM bottom face needs to found
+        # so initial value will be false
         foundBottomFace = False
         
         for lR in cOM.iter(GML+"LinearRing"):
@@ -248,8 +239,8 @@ nof is the number of features you have"""
 
             # keep face?
             if checkBottomFace(posData) and not foundBottomFace:
-                # if bottom face store cOm and x,y,z values
-                bottomFaces.append([cOMCount,posData])
+                # if bottom face store cOmID and x,y,z values
+                bottomFaces.append([count,posData])
                 # if bottom face of cOM has been found, then switch trigger to True
                 # this is done to increase the efficiency.
                 # It is assumed there is only 1 bottom face for each cOM
