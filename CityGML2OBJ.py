@@ -238,11 +238,18 @@ nof is the number of features you have"""
         # for each cOM bottom face needs to found
         # so initial value will be false
         foundBottomFace = False
-        
+               
+        pointlist += list(s)
+        # with pointlist we can generate the face-lines in the .obj file:
         for lR in cOM.iter(GML+"LinearRing"):
+            print >>fac, "f",
+            for pos in range(len(lR)-1):
+                print >>fac, pointlist.index(lR[pos].text)+1,
+            print >>fac
 
+            # do stuff to calculate centroid:
             posData = []
-            
+
             for pos in lR:
                 s.update([pos.text])
 
@@ -250,7 +257,6 @@ nof is the number of features you have"""
                 x,y,z = pos.text.split()
 
                 posData.append([float(x)]+[float(y)]+[float(z)])
-                
 
             # keep face?
             if checkBottomFace(posData) and not foundBottomFace:
@@ -260,34 +266,16 @@ nof is the number of features you have"""
                 # this is done to increase the efficiency.
                 # It is assumed there is only 1 bottom face for each cOM
                 foundBottomFace = True
-                
-        pointlist += list(s)
-        # with pointlist we can generate the face-lines in the .obj file:
-        for lR in cOM.iter(GML+"LinearRing"):
-            print >>fac, "f",
-            for pos in range(len(lR)-1):
-                print >>fac, pointlist.index(lR[pos].text)+1,
-            print >>fac
 
     print 'translating points...'
-    # initialize
-    pointlistF = []
-    for t in range(3):
-        pointlistF.append([])
-
-    # convert pointlist to floating points
-    for v in pointlist:
-        c = v.split()
-        pointlistF[0].append(float(c[0]))
-        pointlistF[1].append(float(c[1]))
-        pointlistF[2].append(float(c[2]))
 
     # calculate offset
     offset = getFinalCentroid(bottomFaces,count)
 
     # Generate the vertex-lines in the .obj file. Also translate the points using the OFFSET
-    for i in range(len(pointlistF[0])):
-        print >>vert, "v %.7f %.7f %.2f" % ( pointlistF[0][i]-offset[0], pointlistF[1][i]-offset[1], pointlistF[2][i] )
+    for p in pointlist:
+        c = p.split()
+        print >>vert, "v %.7f %.7f %.2f" % ( float(c[0])-offset[0], float(c[1])-offset[1], float(c[2]) )
 
     # write the file
     f = open(outfile, 'w')
