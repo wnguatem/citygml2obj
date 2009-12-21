@@ -140,6 +140,77 @@ def convert(infile, outfile):
         y = (min(plist[1])+max(plist[1]))/2
         return (x,y)
 
+    def checkBottomFace(data):
+        """ Check if current face is bottom face, data contains [linearRing,x,y,z]"""
+
+        bottomFace = True
+        
+        for p in data:
+            if p[2]!=0:
+                bottomFace = False
+
+        return bottomFace
+
+    def getArea(polygon):
+        """ Get area of a polygon, polygon list looks like [[x1,y1,z1],[x2,y2,z2]] """
+        # soruce: http://en.wikipedia.org/wiki/Centroid
+
+        Asum = 0
+        for p in range(0,len(polygon)):
+            if p==len(polygon)-1:
+                # go back again to first point
+                Asum += (polygon[p][0]*polygon[0][1])-(polygon[0][0]*polygon[p][1])
+            else:
+                Asum += (polygon[p][0]*polygon[p+1][1])-(polygon[p+1][0]*polygon[p][1])
+
+        return 0.5*Asum
+
+    def getCentroid(Area,polygon):
+        """ returns centroid of polygon in x,y coordinates"""
+        # soruce: http://en.wikipedia.org/wiki/Centroid
+
+        Sum = 0
+        for p in range(0,len(polygon)):
+            if p==len(polygon)-1:
+                # go back again to first point
+                Sum += (polygon[p][0]+polygon[0][0])*(polygon[p][0]*polygon[0][1]-polygon[0][0]*polygon[p][1])
+            else:
+                Sum += (polygon[p][0]+polygon[p+1][0])*(polygon[p][0]*polygon[p+1][1]-polygon[p+1][0]*polygon[p][1])
+
+        Cx = (1/(6*Area))*Sum
+
+        Sum = 0
+        for p in range(0,len(polygon)):
+            if p==len(polygon)-1:
+                # go back again to first point
+                Sum += (polygon[p][1]+polygon[0][1])*(polygon[p][0]*polygon[0][1]-polygon[0][0]*polygon[p][1])
+            else:
+                Sum += (polygon[p][1]+polygon[p+1][1])*(polygon[p][0]*polygon[p+1][1]-polygon[p+1][0]*polygon[p][1])
+        
+        Cy = (1/(6*Area))*Sum
+        
+        return (Cx,Cy)
+
+    def getFinalCentroid(bottomFaces,nof):
+        """Calculate centroid of all bottomfaces together, bottomfaces contains the polygons of each ciyObjectMember.
+nof is the number of features you have"""
+
+        sumCx = 0
+        sumCy = 0        
+        
+        # get sum of centroids in x and y direction
+        for i in range(0,len(bottomFaces)):
+                        
+            currentCentroid = getCentroid(getArea(bottomFaces[i][1]),bottomFaces[i][1])
+            sumCx += currentCentroid[0]
+            sumCy += currentCentroid[1]
+
+        FinalCx = sumCx/nof
+        FinalCy = sumCy/nof
+
+        return FinalCx,FinalCy
+            
+
     # parse the infile
     print 'Reading file...'
     tree = etree.parse(infile)
@@ -150,13 +221,40 @@ def convert(infile, outfile):
 
     pointlist = []
     count = 0
+    bottomFaces = []
+    cOMCount = 0
+    
     # loop through the ciyObjectMember elements, for all faces put the points in a set (so that they are not duplicated). Then extend the pointlist with that set. This gives every unique point an index
     for cOM in tree.iter(CGML+"cityObjectMember"):
         count += 1
+        cOMCount += 1
         s = set([])
+
+        # for each cOM bottom face needs to found
+        foundBottomFace = False
+        
         for lR in cOM.iter(GML+"LinearRing"):
+
+            posData = []
+            
             for pos in lR:
                 s.update([pos.text])
+
+                # get points of bottom face
+                x,y,z = pos.text.split()
+
+                posData.append([float(x)]+[float(y)]+[float(z)])
+                
+
+            # keep face?
+            if checkBottomFace(posData) and not foundBottomFace:
+                # if bottom face store cOm and x,y,z values
+                bottomFaces.append([cOMCount,posData])
+                # if bottom face of cOM has been found, then switch trigger to True
+                # this is done to increase the efficiency.
+                # It is assumed there is only 1 bottom face for each cOM
+                foundBottomFace = True
+                
         pointlist += list(s)
         # with pointlist we can generate the face-lines in the .obj file:
         for lR in cOM.iter(GML+"LinearRing"):
@@ -179,7 +277,7 @@ def convert(infile, outfile):
         pointlistF[2].append(float(c[2]))
 
     # calculate offset
-    offset = xyOffset(pointlistF)
+    offset = getFinalCentroid(bottomFaces,count)
 
     # Generate the vertex-lines in the .obj file. Also translate the points using the OFFSET
     for i in range(len(pointlistF[0])):
@@ -197,6 +295,3 @@ def convert(infile, outfile):
     print 'EPSG %d location: %.9f, %.9f' % (TEPSG,lt,lg)
 
     return (lt, lg, count)
-
-#if __name__ == "__main__":
-#    main(INFILE,OUTFILE,cPointLat,cPointLong,nof)
