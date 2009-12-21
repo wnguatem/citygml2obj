@@ -9,9 +9,10 @@ from lxml import etree
 from osgeo import ogr
 
 #server modules:
-import _mysql
-import datetime
-from mod_python import util
+if __name__ != "__main__":
+    import _mysql
+    import datetime
+    from mod_python import util
 
 #-- Global variables
 
@@ -22,7 +23,22 @@ SEPSG, TEPSG = 28992,4326
 GML = "{%s}" % 'http://www.opengis.net/gml'
 CGML = "{%s}" % 'http://www.citygml.org/citygml/1/0/0'
 
-def main(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
+def main(INFILE,OUTFILE):
+    """
+    Performs conversion, adds the model to DB, and redirects the user back to the main page. This function is called when executing this script from the command line, using the first argument as INFILE, and the second argument as OUTFILE
+    Input:
+    - req: mod_python specific (something with the current http Request)
+    - INFILE: the location of the cityGML file
+    - OUTFILE: where to put the .obj file
+    Output:
+    - some info on the shell
+    - .obj file
+    """
+    data = convert(INFILE, OUTFILE)
+
+    cPointLat,cPointLong,nof = data
+    
+def index(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
     """
     Performs conversion, adds the model to DB, and redirects the user back to the main page. Note that this function is made to be called from a browser using mod_python et all.
     Input:
@@ -40,8 +56,7 @@ def main(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
     
     insertDB(OUTFILE_DB,cPointLat,cPointLong,INFILE_DB,nof)
 
-    util.redirect(req, '../3d_bing_maps_viewer.php')
-
+    util.redirect(req, '3d_bing_maps_viewer.php')
 
 def insertDB(objFilePath,cPointLat,cPointLong,gmlFilePath,nof):
     """
@@ -286,3 +301,6 @@ nof is the number of features you have"""
     print 'EPSG %d location: %.9f, %.9f' % (TEPSG,lt,lg)
 
     return (lt, lg, count)
+    
+if __name__ == "__main__":
+    main(sys.argv[1], sys.argv[2])

@@ -33,7 +33,7 @@ if (isset($_POST['upload']))
 					$outfile = "$path/upload/$outfileName";
 					
 					// RUN main from python script with given arguments
-					$url = "CityGML2OBJ.py/main?INFILE=$infile&OUTFILE=$outfile&INFILE_DB=$file&OUTFILE_DB=$outfileName";
+					$url = "CityGML2OBJ.py?INFILE=$infile&OUTFILE=$outfile&INFILE_DB=$file&OUTFILE_DB=$outfileName";
 					echo "<meta http-equiv=\"refresh\" content=\"0;url=$url\">"; // execute $url command
 						
 				}
