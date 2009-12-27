@@ -109,7 +109,7 @@ mysql_select_db($dbname,$connect) or die(mysql_error());
                 <td bgcolor=\"#E1E1E1\">$row->objID</td>
                 <td bgcolor=\"#E1E1E1\">$row->nof</td>
                 <td bgcolor=\"#E1E1E1\">$row->date</td>
-                <td bgcolor=\"#E1E1E1\"><input id=\"btnAddModel\" type=\"button\" value=\"Load 3D Model\" 
+                <td bgcolor=\"#E1E1E1\"><input id=\"btnAddModel\" type=\"button\" value=\"Add 3D Model\" 
          onClick=\"AddModel('$objFile',$row->cPointLat,$row->cPointLong);\">
 </td>
               </tr>";
