@@ -247,7 +247,7 @@ nof is the number of features you have"""
                 print >>fac, pointlist.index(lR[pos].text)+1,
             print >>fac
 
-            # do stuff to calculate centroid:
+            # needed to calculate centroid
             posData = []
 
             for pos in lR:
