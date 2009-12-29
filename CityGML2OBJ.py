@@ -35,8 +35,6 @@ def main(INFILE,OUTFILE):
     - .obj file
     """
     data = convert(INFILE, OUTFILE)
-
-    cPointLat,cPointLong,nof = data
     
 def index(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
     """
@@ -50,9 +48,7 @@ def index(req,INFILE,OUTFILE,INFILE_DB,OUTFILE_DB):
     Output:
     - Redirects user to main php script 
     """
-    data = convert(INFILE, OUTFILE)
-
-    cPointLat,cPointLong,nof = data
+    cPointLat,cPointLong,nof = convert(INFILE, OUTFILE)
     
     insertDB(OUTFILE_DB,cPointLat,cPointLong,INFILE_DB,nof)
 
@@ -238,18 +234,11 @@ nof is the number of features you have"""
         # for each cOM bottom face needs to found
         # so initial value will be false
         foundBottomFace = False
-               
-        pointlist += list(s)
-        # with pointlist we can generate the face-lines in the .obj file:
+        
         for lR in cOM.iter(GML+"LinearRing"):
-            print >>fac, "f",
-            for pos in range(len(lR)-1):
-                print >>fac, pointlist.index(lR[pos].text)+1,
-            print >>fac
 
-            # needed to calculate centroid
             posData = []
-
+            
             for pos in lR:
                 s.update([pos.text])
 
@@ -257,6 +246,7 @@ nof is the number of features you have"""
                 x,y,z = pos.text.split()
 
                 posData.append([float(x)]+[float(y)]+[float(z)])
+                
 
             # keep face?
             if checkBottomFace(posData) and not foundBottomFace:
@@ -266,6 +256,14 @@ nof is the number of features you have"""
                 # this is done to increase the efficiency.
                 # It is assumed there is only 1 bottom face for each cOM
                 foundBottomFace = True
+                
+        pointlist += list(s)
+        # with pointlist we can generate the face-lines in the .obj file:
+        for lR in cOM.iter(GML+"LinearRing"):
+            print >>fac, "f",
+            for pos in range(len(lR)-1):
+                print >>fac, pointlist.index(lR[pos].text)+1,
+            print >>fac
 
     print 'translating points...'
 
