@@ -1,5 +1,5 @@
 #General modules:
-import sys, os
+import sys
 import StringIO
 
 #lxml for parsing gml:
