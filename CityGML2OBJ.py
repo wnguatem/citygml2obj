@@ -68,9 +68,9 @@ def insertDB(objFilePath,cPointLat,cPointLong,gmlFilePath,nof):
     """
     # Required information to connect to DB
     host = 'localhost'
-    user = 'root'
-    password = '1234'
-    dbname = 'vis3'     
+    user = 'webvis1'
+    password = '3dve'
+    dbname = '3dve'     
     
     # make DB connection
     db = _mysql.connect(host,user,password,dbname)
@@ -289,4 +289,9 @@ nof is the number of features you have"""
     return (lt, lg, count)
     
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    if len(sys.argv) == 3:
+        main(sys.argv[1], sys.argv[2])
+    else:
+        print "Usage: python CityGML2OBJ.py in.xml out.obj"
+    
+    

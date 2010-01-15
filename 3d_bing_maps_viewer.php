@@ -4,9 +4,9 @@
 
 // make db connection
 $host = "localhost";
-$user = "root";
-$pass = "1234";
-$dbname = "vis3";
+$user = "webvis1";
+$pass = "3dve";
+$dbname = "3dve";
 
 $connect = mysql_connect($host,$user,$pass) or die(mysql_error());
 mysql_select_db($dbname,$connect) or die(mysql_error());
